@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "rooms": [],
+  "services": [],
+  "expenses": [],
+  "incomes": [],
+  "activities": [
+    {
+      "id": "act_init",
+      "type": "system",
+      "text": "System initialized. Add rooms to get started!",
+      "time": "2026-06-11T10:13:00.000Z"
+    }
+  ]
+}

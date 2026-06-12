@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StaySync - Guest House Manager</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="app_icon.png">
+</head>
+<body>
+    <!-- Toast Notification Banner -->
+    <div class="toast-notification" id="toast-notify">
+        <div class="toast-icon" id="toast-notify-icon">
+            <i data-lucide="bell"></i>
+        </div>
+        <div class="toast-content">
+            <span class="toast-title" id="toast-notify-title">Staff Update</span>
+            <span class="toast-message" id="toast-notify-message">Details</span>
+        </div>
+    </div>
+
+    <div class="mobile-container">
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="header-main">
+                <div class="brand">
+                    <div class="logo-icon">
+                        <i data-lucide="hotel"></i>
+                    </div>
+                    <div>
+                        <h1>StaySync</h1>
+                        <span class="sub-logo">Guest House Management</span>
+                    </div>
+                </div>
+                <button class="quick-calc-btn" id="open-calc-btn" title="Open Calculator">
+                    <i data-lucide="calculator"></i>
+                </button>
+            </div>
+            <div class="header-date" id="current-date-display">Thursday, June 11</div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-content">
+            <!-- TAB: Dashboard -->
+            <section id="tab-dashboard" class="tab-view active">
+                <div class="section-title">
+                    <h2>Overview</h2>
+                </div>
+                
+                <!-- Quick Metrics Grid -->
+                <div class="metrics-grid">
+                    <div class="metric-card bg-primary-light">
+                        <div class="metric-icon color-primary"><i data-lucide="door-closed"></i></div>
+                        <div class="metric-details">
+                            <span class="metric-label">Total Rooms</span>
+                            <span class="metric-value" id="dash-total-rooms">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card bg-success-light">
+                        <div class="metric-icon color-success"><i data-lucide="check-circle"></i></div>
+                        <div class="metric-details">
+                            <span class="metric-label">Empty Rooms</span>
+                            <span class="metric-value text-success" id="dash-empty-rooms">0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card bg-warning-light">
+                        <div class="metric-icon color-warning"><i data-lucide="user-check"></i></div>
+                        <div class="metric-details">
+                            <span class="metric-label">Occupied Rooms</span>
+                            <span class="metric-value text-warning" id="dash-occupied-rooms">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Card -->
+                <div class="financial-card">
+                    <div class="card-header">
+                        <h3>Financial Summary</h3>
+                        <span class="badge badge-date">This Month</span>
+                    </div>
+                    <div class="balance-display">
+                        <span class="balance-label">Net Profit</span>
+                        <span class="balance-amount" id="dash-net-profit">₹0.00</span>
+                    </div>
+                    <div class="financial-row">
+                        <div class="fin-stat">
+                            <span class="fin-stat-label"><i data-lucide="trending-up" class="color-success"></i> Income</span>
+                            <span class="fin-stat-value text-success" id="dash-total-income">₹0.00</span>
+                        </div>
+                        <div class="fin-stat-divider"></div>
+                        <div class="fin-stat">
+                            <span class="fin-stat-label"><i data-lucide="trending-down" class="color-danger"></i> Expenses</span>
+                            <span class="fin-stat-value text-danger" id="dash-total-expenses">₹0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Feed -->
+                <div class="recent-activity">
+                    <div class="card-header">
+                        <h3>Recent Activity</h3>
+                        <button class="text-btn" id="clear-activity-btn">Clear Logs</button>
+                    </div>
+                    <ul class="activity-list" id="activity-log-list">
+                        <!-- Populated by JS -->
+                        <li class="empty-list-message">No activities logged yet today.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- TAB: Rooms -->
+            <section id="tab-rooms" class="tab-view">
+                <div class="view-header-row">
+                    <div class="section-title">
+                        <h2>Rooms</h2>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="btn-trigger-add-room">
+                        <i data-lucide="plus"></i> Add Room
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-chips">
+                    <button class="chip active" data-filter="all">All</button>
+                    <button class="chip" data-filter="empty">Empty</button>
+                    <button class="chip" data-filter="occupied">Occupied</button>
+                </div>
+
+                <!-- Rooms Grid -->
+                <div class="rooms-grid" id="rooms-container">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- TAB: Services -->
+            <section id="tab-services" class="tab-view">
+                <div class="view-header-row">
+                    <div class="section-title">
+                        <h2>Room Services</h2>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="btn-trigger-add-service">
+                        <i data-lucide="plus"></i> Add Service
+                    </button>
+                </div>
+
+                <!-- Active Service Requests -->
+                <div class="service-section">
+                    <div class="card-header">
+                        <h3>Pending Requests</h3>
+                    </div>
+                    <div class="service-list" id="pending-services-container">
+                        <!-- Populated by JS -->
+                        <div class="empty-state">
+                            <i data-lucide="smile"></i>
+                            <p>All service requests completed!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="service-section mt-4">
+                    <div class="card-header">
+                        <h3>Service History</h3>
+                    </div>
+                    <div class="service-list" id="history-services-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Expenses -->
+            <section id="tab-expenses" class="tab-view">
+                <div class="view-header-row">
+                    <div class="section-title">
+                        <h2>Expenses & Salaries</h2>
+                    </div>
+                    <button class="btn btn-danger btn-sm" id="btn-trigger-add-expense">
+                        <i data-lucide="plus"></i> Log Expense
+                    </button>
+                </div>
+
+                <!-- Expense Summary Cards -->
+                <div class="metrics-grid">
+                    <div class="metric-card bg-danger-light">
+                        <div class="metric-details">
+                            <span class="metric-label">Staff Salaries</span>
+                            <span class="metric-value text-danger" id="exp-total-staff">₹0</span>
+                        </div>
+                    </div>
+                    <div class="metric-card bg-warning-light">
+                        <div class="metric-details">
+                            <span class="metric-label">Utilities & Others</span>
+                            <span class="metric-value text-warning" id="exp-total-other">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expense Log -->
+                <div class="recent-activity mt-4">
+                    <div class="card-header">
+                        <h3>Expense Ledger</h3>
+                    </div>
+                    <div class="expense-list-container">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expense-ledger-tbody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Analytics -->
+            <section id="tab-analytics" class="tab-view">
+                <div class="section-title">
+                    <h2>Analytics Report</h2>
+                </div>
+
+                <!-- Progress/Occupancy Bar Chart -->
+                <div class="analytics-card">
+                    <h3>Occupancy Rate</h3>
+                    <div class="occupancy-progress-container">
+                        <div class="occupancy-progress-bar" id="occupancy-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="occupancy-stats mt-2">
+                        <span id="occupancy-percentage">0% Occupied</span>
+                        <span id="occupancy-fraction">0 / 0 Rooms Filled</span>
+                    </div>
+                </div>
+
+                <!-- Financial Breakdown -->
+                <div class="analytics-card mt-3">
+                    <h3>Financial Breakdown</h3>
+                    <div class="breakdown-chart">
+                        <div class="chart-item">
+                            <div class="chart-label-row">
+                                <span>Room Rent Income</span>
+                                <span id="anal-rent-inc">₹0.00</span>
+                            </div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill fill-rent" id="anal-rent-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="chart-item mt-3">
+                            <div class="chart-label-row">
+                                <span>Room Service Income</span>
+                                <span id="anal-service-inc">₹0.00</span>
+                            </div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill fill-service" id="anal-service-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="chart-item mt-3">
+                            <div class="chart-label-row">
+                                <span>Staff Expenses</span>
+                                <span id="anal-staff-exp" class="text-danger">₹0.00</span>
+                            </div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill fill-staff" id="anal-staff-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="chart-item mt-3">
+                            <div class="chart-label-row">
+                                <span>Utility & Other Expenses</span>
+                                <span id="anal-other-exp" class="text-danger">₹0.00</span>
+                            </div>
+                            <div class="chart-bar-bg">
+                                <div class="chart-bar-fill fill-other" id="anal-other-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reset-data-container mt-4">
+                    <button class="btn btn-outline-danger w-100" id="btn-reset-system">
+                        <i data-lucide="refresh-cw"></i> Reset App Data
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="app-nav">
+            <button class="nav-item active" data-tab="dashboard">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" data-tab="rooms">
+                <i data-lucide="door-open"></i>
+                <span>Rooms</span>
+            </button>
+            <button class="nav-item" data-tab="services">
+                <i data-lucide="soup"></i>
+                <span>Services</span>
+            </button>
+            <button class="nav-item" data-tab="expenses">
+                <i data-lucide="receipt"></i>
+                <span>Expenses</span>
+            </button>
+            <button class="nav-item" data-tab="analytics">
+                <i data-lucide="bar-chart-3"></i>
+                <span>Reports</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODAL: Add Room -->
+    <div class="modal-backdrop" id="modal-add-room">
+        <div class="bottom-sheet">
+            <div class="sheet-indicator"></div>
+            <div class="sheet-header">
+                <h3>Create New Room</h3>
+                <button class="close-sheet-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-add-room" class="sheet-body">
+                <div class="form-group">
+                    <label for="room-number">Room Number</label>
+                    <input type="text" id="room-number" placeholder="e.g. 101, 204" required>
+                </div>
+                <div class="form-group">
+                    <label for="room-type">Room Type</label>
+                    <select id="room-type" required>
+                        <option value="Single">Single Room</option>
+                        <option value="Double">Double Room</option>
+                        <option value="Deluxe">Deluxe Room</option>
+                        <option value="Suite">Presidential Suite</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="room-rent">Daily Rent (₹)</label>
+                    <input type="number" id="room-rent" placeholder="e.g. 50" min="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Create Room</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Check-In -->
+    <div class="modal-backdrop" id="modal-check-in">
+        <div class="bottom-sheet">
+            <div class="sheet-indicator"></div>
+            <div class="sheet-header">
+                <h3>Guest Check-In</h3>
+                <button class="close-sheet-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-check-in" class="sheet-body">
+                <input type="hidden" id="checkin-room-id">
+                <div class="room-summary-badge mb-3">
+                    <span class="label">Room:</span>
+                    <span class="value" id="checkin-room-display">101</span>
+                </div>
+                <div class="form-group">
+                    <label for="guest-name">Guest Name</label>
+                    <input type="text" id="guest-name" placeholder="Full name of guest" required>
+                </div>
+                <div class="form-group">
+                    <label for="guest-phone">Phone Number</label>
+                    <input type="tel" id="guest-phone" placeholder="e.g. +1 555-0199">
+                </div>
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="checkin-rent">Rent / Day (₹)</label>
+                        <input type="number" id="checkin-rent" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkin-days">Stay Duration (Days)</label>
+                        <input type="number" id="checkin-days" value="1" min="1" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Confirm Check-In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Check-Out & Billing -->
+    <div class="modal-backdrop" id="modal-check-out">
+        <div class="bottom-sheet">
+            <div class="sheet-indicator"></div>
+            <div class="sheet-header">
+                <h3>Guest Check-Out & Bill</h3>
+                <button class="close-sheet-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="sheet-body">
+                <input type="hidden" id="checkout-room-id">
+                
+                <!-- Room info -->
+                <div class="checkout-summary-card">
+                    <div class="summary-row">
+                        <span class="summary-title" id="checkout-room-title">Room 101</span>
+                        <span class="summary-badge text-warning" id="checkout-guest-name">Guest Name</span>
+                    </div>
+                    <div class="summary-details mt-2">
+                        <div><span class="text-muted">Stay Days:</span> <strong id="checkout-stay-days">0</strong></div>
+                        <div><span class="text-muted">Rate/Day:</span> <strong id="checkout-rent-rate">₹0</strong></div>
+                    </div>
+                </div>
+
+                <!-- Invoice items -->
+                <div class="bill-details mt-3">
+                    <h4>Bill Breakdown</h4>
+                    <div class="bill-line mt-2">
+                        <span>Room Rent Charge (<span id="bill-days-count">0</span> Days)</span>
+                        <span id="bill-room-rent-cost">₹0.00</span>
+                    </div>
+                    <div class="bill-line">
+                        <span>Room Services Total</span>
+                        <span id="bill-services-cost">₹0.00</span>
+                    </div>
+                    
+                    <!-- Expanded services list -->
+                    <div class="services-mini-list mt-1" id="checkout-services-breakdown">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <hr class="bill-divider">
+                    <div class="bill-line total">
+                        <span>Grand Total</span>
+                        <span id="bill-grand-total">₹0.00</span>
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="checkout-actual-days" style="font-size: 0.85rem;">Adjust Stay Days (if different)</label>
+                    <input type="number" id="checkout-actual-days" min="1" style="padding: 8px 12px; font-size: 0.9rem;">
+                </div>
+
+                <button class="btn btn-success w-100 mt-3" id="btn-confirm-checkout">
+                    <i data-lucide="credit-card"></i> Pay & Check-Out Room
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add Room Service -->
+    <div class="modal-backdrop" id="modal-add-service">
+        <div class="bottom-sheet">
+            <div class="sheet-indicator"></div>
+            <div class="sheet-header">
+                <h3>Log Room Service</h3>
+                <button class="close-sheet-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-add-service" class="sheet-body">
+                <div class="form-group">
+                    <label for="service-room-id">Select Occupied Room</label>
+                    <select id="service-room-id" required>
+                        <!-- Populated by occupied rooms -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="service-type">Service Type</label>
+                    <select id="service-type" required>
+                        <option value="Food">Food & Beverage</option>
+                        <option value="Laundry">Laundry Service</option>
+                        <option value="Cleaning">Room Cleaning</option>
+                        <option value="Maintenance">Maintenance / Repair</option>
+                        <option value="Other">Other Custom Service</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="service-desc">Description</label>
+                    <input type="text" id="service-desc" placeholder="e.g. Lunch - Veg Thali, Laundry - 2 Shirts" required>
+                </div>
+                <div class="form-group">
+                    <label for="service-cost">Service Cost (₹)</label>
+                    <input type="number" id="service-cost" placeholder="e.g. 15" min="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Log Service Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Log Expense -->
+    <div class="modal-backdrop" id="modal-add-expense">
+        <div class="bottom-sheet">
+            <div class="sheet-indicator"></div>
+            <div class="sheet-header">
+                <h3>Record Expense</h3>
+                <button class="close-sheet-btn"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-add-expense" class="sheet-body">
+                <div class="form-group">
+                    <label for="expense-title">Expense Title</label>
+                    <input type="text" id="expense-title" placeholder="e.g. Staff Salary - Ramesh, Electricity June" required>
+                </div>
+                <div class="form-group">
+                    <label for="expense-category">Category</label>
+                    <select id="expense-category" required>
+                        <option value="Staff Salary">Staff Salary / wages</option>
+                        <option value="Utilities">Utilities (Electricity, Water, Wifi)</option>
+                        <option value="Maintenance">Maintenance & Repairs</option>
+                        <option value="Supplies">Food & Guest Supplies</option>
+                        <option value="Other">Other Expenses</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expense-amount">Amount (₹)</label>
+                    <input type="number" id="expense-amount" placeholder="e.g. 250" min="1" step="any" required>
+                </div>
+                <button type="submit" class="btn btn-danger w-100">Add Expense Entry</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Built-in Calculator -->
+    <div class="modal-backdrop" id="modal-calculator">
+        <div class="bottom-sheet calculator-sheet">
+            <div class="sheet-indicator"></div>
+            <div class="sheet-header">
+                <h3>Quick Expense Calculator</h3>
+                <button class="close-sheet-btn" id="close-calc-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="sheet-body calculator-body">
+                <!-- Calc Screen -->
+                <div class="calc-screen">
+                    <div class="calc-history" id="calc-history-view"></div>
+                    <div class="calc-display" id="calc-display-view">0</div>
+                </div>
+                <!-- Calc Keys -->
+                <div class="calc-keyboard">
+                    <button class="calc-key op-key" data-action="clear">C</button>
+                    <button class="calc-key op-key" data-action="backspace"><i data-lucide="delete"></i></button>
+                    <button class="calc-key op-key" data-val="/">/</button>
+                    <button class="calc-key op-key" data-val="*">×</button>
+
+                    <button class="calc-key num-key" data-val="7">7</button>
+                    <button class="calc-key num-key" data-val="8">8</button>
+                    <button class="calc-key num-key" data-val="9">9</button>
+                    <button class="calc-key op-key" data-val="-">-</button>
+
+                    <button class="calc-key num-key" data-val="4">4</button>
+                    <button class="calc-key num-key" data-val="5">5</button>
+                    <button class="calc-key num-key" data-val="6">6</button>
+                    <button class="calc-key op-key" data-val="+">+</button>
+
+                    <div class="calc-keys-bottom-row">
+                        <div class="calc-keys-sub-grid">
+                            <button class="calc-key num-key" data-val="1">1</button>
+                            <button class="calc-key num-key" data-val="2">2</button>
+                            <button class="calc-key num-key" data-val="3">3</button>
+                            <button class="calc-key num-key double-width" data-val="0">0</button>
+                            <button class="calc-key num-key" data-val=".">.</button>
+                        </div>
+                        <button class="calc-key eq-key" data-action="calculate">=</button>
+                    </div>
+                </div>
+                <!-- Quick Save Panel -->
+                <div class="calc-save-panel">
+                    <button class="btn btn-outline-danger w-100" id="btn-calc-save-expense" disabled>
+                        <i data-lucide="plus-circle"></i> Save Result to Expenses
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: User Name Setup -->
+    <div class="modal-backdrop" id="modal-user-setup">
+        <div class="bottom-sheet">
+            <div class="sheet-indicator"></div>
+            <div class="sheet-header">
+                <h3>Welcome to StaySync</h3>
+            </div>
+            <form id="form-user-setup" class="sheet-body">
+                <p class="text-muted mb-3" style="font-size:0.85rem;">Please enter your name so your team knows who performs actions (like check-ins or logging expenses).</p>
+                <div class="form-group">
+                    <label for="setup-user-name">Your Name</label>
+                    <input type="text" id="setup-user-name" placeholder="e.g. Raju, Kiran" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Start Using App</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
